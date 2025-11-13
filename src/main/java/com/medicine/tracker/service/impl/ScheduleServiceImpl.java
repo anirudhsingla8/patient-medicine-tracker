@@ -136,6 +136,17 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .filter(s -> s.getUserId().equals(userId))
                 .orElseThrow(() -> new RuntimeException("Schedule not found or does not belong to user"));
         
+        // Check if a schedule with the same medicine, time of day, and frequency already exists (excluding the current schedule being updated)
+        Schedule.Frequency frequency = scheduleRequest.getFrequency() != null ? scheduleRequest.getFrequency() : Schedule.Frequency.DAILY;
+        if (scheduleRepository.existsByMedicineIdAndTimeOfDayAndFrequencyAndIsActiveTrue(schedule.getMedicineId(), scheduleRequest.getTimeOfDay(), frequency)) {
+            // Find the existing schedule that matches the new values
+            List<Schedule> existingSchedules = scheduleRepository.findByMedicineIdAndTimeOfDayAndFrequencyAndIsActiveTrue(schedule.getMedicineId(), scheduleRequest.getTimeOfDay(), frequency);
+            // Only throw exception if the matching schedule is not the one we're updating
+            if (existingSchedules.stream().anyMatch(s -> !s.getId().equals(scheduleId))) {
+                throw new RuntimeException("A schedule already exists for this medicine with the same time and frequency");
+            }
+        }
+        
         // Update schedule properties
         schedule.setTimeOfDay(scheduleRequest.getTimeOfDay());
         schedule.setFrequency(scheduleRequest.getFrequency());
