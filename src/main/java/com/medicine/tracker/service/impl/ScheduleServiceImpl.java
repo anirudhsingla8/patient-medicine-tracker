@@ -39,6 +39,12 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .filter(m -> m.getUserId().equals(userId))
                 .orElseThrow(() -> new RuntimeException("Medicine not found or does not belong to user"));
         
+        // Check if a schedule with the same medicine, time of day, and frequency already exists
+        Schedule.Frequency frequency = scheduleRequest.getFrequency() != null ? scheduleRequest.getFrequency() : Schedule.Frequency.DAILY;
+        if (scheduleRepository.existsByMedicineIdAndTimeOfDayAndFrequencyAndIsActiveTrue(medicineId, scheduleRequest.getTimeOfDay(), frequency)) {
+            throw new RuntimeException("A schedule already exists for this medicine with the same time and frequency");
+        }
+        
         Schedule schedule = Schedule.builder()
                 .medicineId(medicineId)
                 .profileId(medicine.getProfileId())

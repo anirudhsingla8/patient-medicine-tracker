@@ -60,4 +60,14 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
      * @return List of active schedules matching the time
      */
     List<Schedule> findByTimeOfDayAndIsActiveTrue(LocalTime timeOfDay);
+    
+    /**
+     * Check if a schedule exists with the same medicine, time of day, and frequency
+     * @param medicineId The medicine ID to check
+     * @param timeOfDay The time of day to check
+     * @param frequency The frequency to check
+     * @param isActive The active status to check
+     * @return true if a matching schedule exists, false otherwise
+     */
+    boolean existsByMedicineIdAndTimeOfDayAndFrequencyAndIsActiveTrue(UUID medicineId, LocalTime timeOfDay, com.medicine.tracker.model.entity.Schedule.Frequency frequency);
 }
