@@ -1,0 +1,1010 @@
+{
+	"info": {
+		"_postman_id": "medicine-tracker-api-v1",
+		"name": "Medicine Tracker API",
+		"description": "Complete API collection for Medicine Tracker Spring Boot application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Pre-request script to handle token refresh if needed",
+					"const authToken = pm.environment.get('authToken');",
+					"if (authToken) {",
+					"    pm.request.headers.add({",
+					"        key: 'Authorization',",
+					"        value: `Bearer ${authToken}`",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script to check response status",
+					"pm.test('Status code is successful', function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "profileId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "medicineId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "scheduleId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "globalMedicineId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Server Status",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Check server status and basic information"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('authToken', response.token);",
+									"    pm.environment.set('userId', response.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"Password123!\",\n    \"name\": \"John Doe\",\n    \"phoneNumber\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user account"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('authToken', response.token);",
+									"    pm.environment.set('userId', response.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with email and password"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout and invalidate the current token"
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/forgot-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Request password reset for an email"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Update FCM Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fcmToken\": \"your-fcm-token-here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/fcm-token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"fcm-token"
+							]
+						},
+						"description": "Update FCM token for push notifications"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profiles",
+			"item": [
+				{
+					"name": "Create Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('profileId', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"age\": 30,\n    \"gender\": \"MALE\",\n    \"relationship\": \"SELF\",\n    \"profilePicture\": \"https://example.com/profile.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/profiles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiles"
+							]
+						},
+						"description": "Create a new profile (family member)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Profiles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiles"
+							]
+						},
+						"description": "Get all profiles for the authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiles/{{profileId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}"
+							]
+						},
+						"description": "Get a specific profile by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe Updated\",\n    \"age\": 31,\n    \"gender\": \"MALE\",\n    \"relationship\": \"SELF\",\n    \"profilePicture\": \"https://example.com/new-profile.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/profiles/{{profileId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}"
+							]
+						},
+						"description": "Update an existing profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Profile",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiles/{{profileId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}"
+							]
+						},
+						"description": "Delete a profile by ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Medicines",
+			"item": [
+				{
+					"name": "Create Medicine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('medicineId', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Aspirin\",\n    \"dosage\": \"100mg\",\n    \"frequency\": \"TWICE_DAILY\",\n    \"quantity\": 30,\n    \"unit\": \"TABLET\",\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-01-31\",\n    \"instructions\": \"Take with food\",\n    \"sideEffects\": \"May cause stomach upset\",\n    \"medicineImage\": \"https://example.com/aspirin.jpg\",\n    \"reminderEnabled\": true,\n    \"reminderTimes\": [\"09:00\", \"21:00\"],\n    \"refillReminderEnabled\": true,\n    \"refillReminderQuantity\": 5,\n    \"notes\": \"For headaches\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/profiles/{{profileId}}/medicines",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"profiles",
+								"{{profileId}}",
+								"medicines"
+							]
+						},
+						"description": "Create a new medicine for a profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Medicines for Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/profiles/{{profileId}}/medicines",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"profiles",
+								"{{profileId}}",
+								"medicines"
+							]
+						},
+						"description": "Get all medicines for a specific profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Medicines for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines"
+							]
+						},
+						"description": "Get all medicines for the authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medicine by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/{{medicineId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"{{medicineId}}"
+							]
+						},
+						"description": "Get a specific medicine by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Medicine",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Aspirin Updated\",\n    \"dosage\": \"200mg\",\n    \"frequency\": \"ONCE_DAILY\",\n    \"quantity\": 60,\n    \"unit\": \"TABLET\",\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-02-28\",\n    \"instructions\": \"Take with water\",\n    \"sideEffects\": \"May cause drowsiness\",\n    \"medicineImage\": \"https://example.com/aspirin-new.jpg\",\n    \"reminderEnabled\": true,\n    \"reminderTimes\": [\"09:00\"],\n    \"refillReminderEnabled\": true,\n    \"refillReminderQuantity\": 10,\n    \"notes\": \"Updated notes\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/{{medicineId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"{{medicineId}}"
+							]
+						},
+						"description": "Update an existing medicine"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Medicine",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/{{medicineId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"{{medicineId}}"
+							]
+						},
+						"description": "Soft delete a medicine (set status to INACTIVE)"
+					},
+					"response": []
+				},
+				{
+					"name": "Take Dose",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/{{medicineId}}/takedose",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"{{medicineId}}",
+								"takedose"
+							]
+						},
+						"description": "Take a dose of medicine (decrement quantity by 1)"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Medicine Image",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "medicineImage",
+									"type": "file",
+									"src": "",
+									"description": "Medicine image file to upload"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/upload-image",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"upload-image"
+							]
+						},
+						"description": "Upload a medicine image to Cloudinary"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Schedules",
+			"item": [
+				{
+					"name": "Create Schedule",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('scheduleId', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"scheduledTime\": \"09:00:00\",\n    \"dosageAmount\": 1,\n    \"dosageUnit\": \"TABLET\",\n    \"frequency\": \"DAILY\",\n    \"daysOfWeek\": [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\"],\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-12-31\",\n    \"reminderEnabled\": true,\n    \"notes\": \"Morning dose\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/schedules/medicines/{{medicineId}}/schedules",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"medicines",
+								"{{medicineId}}",
+								"schedules"
+							]
+						},
+						"description": "Create a new schedule for a medicine"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Schedules for Medicine",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/schedules/medicines/{{medicineId}}/schedules",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"medicines",
+								"{{medicineId}}",
+								"schedules"
+							]
+						},
+						"description": "Get all schedules for a specific medicine"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Schedules for Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/schedules/profiles/{{profileId}}/schedules",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"profiles",
+								"{{profileId}}",
+								"schedules"
+							]
+						},
+						"description": "Get all schedules for a specific profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Schedules for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/schedules",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"schedules"
+							]
+						},
+						"description": "Get all schedules for the authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Schedule by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/schedules/{{scheduleId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"{{scheduleId}}"
+							]
+						},
+						"description": "Get a specific schedule by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Schedule",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"scheduledTime\": \"10:00:00\",\n    \"dosageAmount\": 2,\n    \"dosageUnit\": \"TABLET\",\n    \"frequency\": \"TWICE_DAILY\",\n    \"daysOfWeek\": [\"MONDAY\", \"WEDNESDAY\", \"FRIDAY\"],\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-06-30\",\n    \"reminderEnabled\": false,\n    \"notes\": \"Updated schedule\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/schedules/{{scheduleId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"{{scheduleId}}"
+							]
+						},
+						"description": "Update an existing schedule"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Schedule",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/schedules/{{scheduleId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"{{scheduleId}}"
+							]
+						},
+						"description": "Delete a schedule by ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Global Medicines",
+			"item": [
+				{
+					"name": "Create Global Medicine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('globalMedicineId', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Paracetamol\",\n    \"genericName\": \"Acetaminophen\",\n    \"category\": \"PAIN_RELIEF\",\n    \"manufacturer\": \"Generic Pharma\",\n    \"dosageForm\": \"TABLET\",\n    \"strength\": \"500mg\",\n    \"description\": \"Used for pain relief and fever reduction\",\n    \"sideEffects\": \"Rare side effects include allergic reactions\",\n    \"contraindications\": \"Liver disease\",\n    \"interactions\": \"Alcohol\",\n    \"imageUrl\": \"https://example.com/paracetamol.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/global-medicines",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"global-medicines"
+							]
+						},
+						"description": "Create a new global medicine"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Global Medicines",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/global-medicines",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"global-medicines"
+							]
+						},
+						"description": "Get all global medicines"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Global Medicine by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/global-medicines/{{globalMedicineId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"global-medicines",
+								"{{globalMedicineId}}"
+							]
+						},
+						"description": "Get a specific global medicine by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Global Medicines by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/global-medicines/search?name=Para",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"global-medicines",
+								"search"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Para",
+									"description": "Partial name to search for"
+								}
+							]
+						},
+						"description": "Search global medicines by name (partial match)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Global Medicines by Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/global-medicines/category/PAIN_RELIEF",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"global-medicines",
+								"category",
+								"PAIN_RELIEF"
+							]
+						},
+						"description": "Get global medicines by category"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Global Medicine",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Paracetamol Updated\",\n    \"genericName\": \"Acetaminophen\",\n    \"category\": \"PAIN_RELIEF\",\n    \"manufacturer\": \"Updated Pharma\",\n    \"dosageForm\": \"TABLET\",\n    \"strength\": \"650mg\",\n    \"description\": \"Updated description\",\n    \"sideEffects\": \"Updated side effects\",\n    \"contraindications\": \"Updated contraindications\",\n    \"interactions\": \"Updated interactions\",\n    \"imageUrl\": \"https://example.com/paracetamol-new.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/global-medicines/{{globalMedicineId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"global-medicines",
+								"{{globalMedicineId}}"
+							]
+						},
+						"description": "Update an existing global medicine"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Global Medicine",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/global-medicines/{{globalMedicineId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"global-medicines",
+								"{{globalMedicineId}}"
+							]
+						},
+						"description": "Delete a global medicine by ID"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
