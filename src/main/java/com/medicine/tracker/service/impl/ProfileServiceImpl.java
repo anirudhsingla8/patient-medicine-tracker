@@ -34,6 +34,12 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileResponse createProfile(UUID userId, ProfileRequest profileRequest) {
         log.info("Creating profile for user {}", userId);
         
+        // Check if a profile with the same name already exists for this user
+        if (profileRepository.existsByUserIdAndName(userId, profileRequest.getName())) {
+            log.warn("Profile with name {} already exists for user {}", profileRequest.getName(), userId);
+            throw new RuntimeException("A profile with this name already exists for this user");
+        }
+        
         Profile profile = Profile.builder()
                 .userId(userId)
                 .name(profileRequest.getName())
@@ -97,6 +103,12 @@ public class ProfileServiceImpl implements ProfileService {
                     log.warn("Profile not found or does not belong to user: {} for user {}", profileId, userId);
                     return new RuntimeException("Profile not found or does not belong to user");
                 });
+        
+        // Check if a profile with the same name already exists for this user (excluding the current profile)
+        if (profileRepository.existsByUserIdAndNameAndIdNot(userId, profileRequest.getName(), profileId)) {
+            log.warn("Profile with name {} already exists for user {}", profileRequest.getName(), userId);
+            throw new RuntimeException("A profile with this name already exists for this user");
+        }
         
         profile.setName(profileRequest.getName());
         
