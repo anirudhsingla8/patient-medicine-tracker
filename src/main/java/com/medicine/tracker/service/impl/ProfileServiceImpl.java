@@ -1,10 +1,14 @@
 package com.medicine.tracker.service.impl;
 
 import com.medicine.tracker.model.dto.request.ProfileRequest;
+import com.medicine.tracker.model.dto.response.MedicineResponse;
 import com.medicine.tracker.model.dto.response.ProfileResponse;
+import com.medicine.tracker.model.dto.response.ScheduleResponse;
 import com.medicine.tracker.model.entity.Profile;
 import com.medicine.tracker.repository.ProfileRepository;
+import com.medicine.tracker.service.MedicineService;
 import com.medicine.tracker.service.ProfileService;
+import com.medicine.tracker.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,8 @@ import java.util.stream.Collectors;
 public class ProfileServiceImpl implements ProfileService {
     
     private final ProfileRepository profileRepository;
+    private final MedicineService medicineService;
+    private final ScheduleService scheduleService;
     
     /**
      * Create a new profile for a user
@@ -133,6 +139,37 @@ public class ProfileServiceImpl implements ProfileService {
                     log.warn("Profile not found or does not belong to user: {} for user {}", profileId, userId);
                     return new RuntimeException("Profile not found or does not belong to user");
                 });
+        
+        // Delete all schedules associated with this profile
+        // Note: We need to get all schedules for the profile first and then delete them
+        // Since there's no direct method in ScheduleService to delete by profileId,
+        // we'll need to get the schedules and delete them one by one
+        try {
+            List<ScheduleResponse> schedules = scheduleService.getSchedulesForProfile(userId, profileId);
+            for (ScheduleResponse schedule : schedules) {
+                scheduleService.deleteSchedule(schedule.getId(), userId);
+            }
+            log.info("Deleted {} schedules associated with profile {}", schedules.size(), profileId);
+        } catch (Exception e) {
+            log.error("Error deleting schedules for profile {}: {}", profileId, e.getMessage());
+            throw e;
+        }
+        
+        // Delete all medicines associated with this profile
+        // Since there's no direct method in MedicineService to delete by profileId,
+        // we'll need to get the medicines and delete them one by one
+        try {
+            List<MedicineResponse> medicines = medicineService.getAllMedicinesForProfile(userId, profileId);
+            for (MedicineResponse medicine : medicines) {
+                // Use the medicineId and profileId to delete the medicine
+                // The deleteMedicine method requires profileId and userId
+                medicineService.deleteMedicine(medicine.getId(), userId, profileId);
+            }
+            log.info("Deleted {} medicines associated with profile {}", medicines.size(), profileId);
+        } catch (Exception e) {
+            log.error("Error deleting medicines for profile {}: {}", profileId, e.getMessage());
+            throw e;
+        }
         
         profileRepository.delete(profile);
         log.info("Profile deleted successfully with ID: {}", profileId);
