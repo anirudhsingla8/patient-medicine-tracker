@@ -49,25 +49,28 @@ public interface MedicineService {
      * Update an existing medicine
      * @param medicineId The ID of the medicine to update
      * @param userId The ID of the user updating the medicine
+     * @param profileId The ID of the profile the medicine belongs to
      * @param medicineRequest The request containing updated medicine details
      * @return Updated medicine response
      */
-    MedicineResponse updateMedicine(UUID medicineId, UUID userId, MedicineRequest medicineRequest);
+    MedicineResponse updateMedicine(UUID medicineId, UUID userId, UUID profileId, MedicineRequest medicineRequest);
     
     /**
      * Soft delete a medicine by ID (set status to INACTIVE)
      * @param medicineId The ID of the medicine to delete
      * @param userId The ID of the user deleting the medicine
+     * @param profileId The ID of the profile the medicine belongs to
      */
-    void deleteMedicine(UUID medicineId, UUID userId);
+    void deleteMedicine(UUID medicineId, UUID userId, UUID profileId);
     
     /**
      * Take a dose of a medicine (decrement quantity by 1)
      * @param medicineId The ID of the medicine to take a dose from
      * @param userId The ID of the user taking the dose
+     * @param profileId The ID of the profile the medicine belongs to
      * @return Updated medicine response after taking the dose
      */
-    MedicineResponse takeDose(UUID medicineId, UUID userId);
+    MedicineResponse takeDose(UUID medicineId, UUID userId, UUID profileId);
     
     /**
      * Check if a medicine exists for a user

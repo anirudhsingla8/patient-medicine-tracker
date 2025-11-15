@@ -20,7 +20,7 @@ import java.util.UUID;
  * Handles CRUD operations for user medicines with profile-based organization
  */
 @RestController
-@RequestMapping("/api/medicines")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class MedicineController {
@@ -39,7 +39,7 @@ public class MedicineController {
             @PathVariable UUID profileId,
             @Valid @RequestBody MedicineRequest medicineRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        com.medicine.tracker.model.entity.User user = 
+        com.medicine.tracker.model.entity.User user =
             (com.medicine.tracker.model.entity.User) authentication.getPrincipal();
         UUID userId = user.getId();
         
@@ -55,7 +55,7 @@ public class MedicineController {
     @GetMapping("/profiles/{profileId}/medicines")
     public ResponseEntity<List<MedicineResponse>> getAllMedicinesForProfile(@PathVariable UUID profileId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        com.medicine.tracker.model.entity.User user = 
+        com.medicine.tracker.model.entity.User user =
             (com.medicine.tracker.model.entity.User) authentication.getPrincipal();
         UUID userId = user.getId();
         
@@ -96,52 +96,56 @@ public class MedicineController {
     
     /**
      * Update an existing medicine
+     * @param profileId The ID of the profile the medicine belongs to
      * @param medicineId The ID of the medicine to update
      * @param medicineRequest The request containing updated medicine details
      * @return Updated medicine response
      */
-    @PutMapping("/{medicineId}")
+    @PutMapping("/profiles/{profileId}/medicines/{medicineId}")
     public ResponseEntity<MedicineResponse> updateMedicine(
+            @PathVariable UUID profileId,
             @PathVariable UUID medicineId,
             @Valid @RequestBody MedicineRequest medicineRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        com.medicine.tracker.model.entity.User user = 
+        com.medicine.tracker.model.entity.User user =
             (com.medicine.tracker.model.entity.User) authentication.getPrincipal();
         UUID userId = user.getId();
         
-        MedicineResponse medicine = medicineService.updateMedicine(medicineId, userId, medicineRequest);
+        MedicineResponse medicine = medicineService.updateMedicine(medicineId, userId, profileId, medicineRequest);
         return ResponseEntity.ok(medicine);
     }
     
     /**
      * Soft delete a medicine by ID (set status to INACTIVE)
+     * @param profileId The ID of the profile the medicine belongs to
      * @param medicineId The ID of the medicine to delete
      * @return Empty response with 204 status
      */
-    @DeleteMapping("/{medicineId}")
-    public ResponseEntity<Void> deleteMedicine(@PathVariable UUID medicineId) {
+    @DeleteMapping("/profiles/{profileId}/medicines/{medicineId}")
+    public ResponseEntity<Void> deleteMedicine(@PathVariable UUID profileId, @PathVariable UUID medicineId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        com.medicine.tracker.model.entity.User user = 
+        com.medicine.tracker.model.entity.User user =
             (com.medicine.tracker.model.entity.User) authentication.getPrincipal();
         UUID userId = user.getId();
         
-        medicineService.deleteMedicine(medicineId, userId);
+        medicineService.deleteMedicine(medicineId, userId, profileId);
         return ResponseEntity.noContent().build();
     }
     
     /**
      * Take a dose of a medicine (decrement quantity by 1)
+     * @param profileId The ID of the profile the medicine belongs to
      * @param medicineId The ID of the medicine to take a dose from
      * @return Updated medicine response after taking the dose
      */
-    @PostMapping("/{medicineId}/takedose")
-    public ResponseEntity<MedicineResponse> takeDose(@PathVariable UUID medicineId) {
+    @PostMapping("/profiles/{profileId}/medicines/{medicineId}/takedose")
+    public ResponseEntity<MedicineResponse> takeDose(@PathVariable UUID profileId, @PathVariable UUID medicineId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        com.medicine.tracker.model.entity.User user = 
+        com.medicine.tracker.model.entity.User user =
             (com.medicine.tracker.model.entity.User) authentication.getPrincipal();
         UUID userId = user.getId();
         
-        MedicineResponse medicine = medicineService.takeDose(medicineId, userId);
+        MedicineResponse medicine = medicineService.takeDose(medicineId, userId, profileId);
         return ResponseEntity.ok(medicine);
     }
     
@@ -150,7 +154,7 @@ public class MedicineController {
      * @param medicineImage The image file to upload
      * @return URL of the uploaded image
      */
-    @PostMapping("/upload-image")
+    @PostMapping("/medicines/upload-image")
     public ResponseEntity<String> uploadMedicineImage(@RequestParam("medicineImage") MultipartFile medicineImage) {
         try {
             String imageUrl = imageUploadService.uploadImage(medicineImage);
