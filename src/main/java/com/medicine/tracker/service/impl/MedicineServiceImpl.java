@@ -137,18 +137,25 @@ public class MedicineServiceImpl implements MedicineService {
      * Update an existing medicine
      * @param medicineId The ID of the medicine to update
      * @param userId The ID of the user updating the medicine
+     * @param profileId The ID of the profile the medicine belongs to
      * @param medicineRequest The request containing updated medicine details
      * @return Updated medicine response
      */
     @Override
-    public MedicineResponse updateMedicine(UUID medicineId, UUID userId, MedicineRequest medicineRequest) {
-        log.info("Updating medicine {} for user {}", medicineId, userId);
+    public MedicineResponse updateMedicine(UUID medicineId, UUID userId, UUID profileId, MedicineRequest medicineRequest) {
+        log.info("Updating medicine {} for user {} and profile {}", medicineId, userId, profileId);
+        
+        // Verify that the profile belongs to the user
+        if (!profileRepository.existsByUserIdAndId(userId, profileId)) {
+            log.warn("Profile {} does not exist or does not belong to user {}", profileId, userId);
+            throw new RuntimeException("Profile does not exist or does not belong to user");
+        }
         
         Medicine medicine = medicineRepository.findById(medicineId)
-                .filter(m -> m.getUserId().equals(userId))
+                .filter(m -> m.getUserId().equals(userId) && m.getProfileId().equals(profileId))
                 .orElseThrow(() -> {
-                    log.warn("Medicine {} not found or does not belong to user {}", medicineId, userId);
-                    return new RuntimeException("Medicine not found or does not belong to user");
+                    log.warn("Medicine {} not found or does not belong to user {} or profile {}", medicineId, userId, profileId);
+                    return new RuntimeException("Medicine not found or does not belong to user or profile");
                 });
         
         // Update medicine properties
@@ -172,16 +179,23 @@ public class MedicineServiceImpl implements MedicineService {
      * Soft delete a medicine by ID (set status to INACTIVE)
      * @param medicineId The ID of the medicine to delete
      * @param userId The ID of the user deleting the medicine
+     * @param profileId The ID of the profile the medicine belongs to
      */
     @Override
-    public void deleteMedicine(UUID medicineId, UUID userId) {
-        log.info("Soft deleting medicine {} for user {}", medicineId, userId);
+    public void deleteMedicine(UUID medicineId, UUID userId, UUID profileId) {
+        log.info("Soft deleting medicine {} for user {} and profile {}", medicineId, userId, profileId);
+        
+        // Verify that the profile belongs to the user
+        if (!profileRepository.existsByUserIdAndId(userId, profileId)) {
+            log.warn("Profile {} does not exist or does not belong to user {}", profileId, userId);
+            throw new RuntimeException("Profile does not exist or does not belong to user");
+        }
         
         Medicine medicine = medicineRepository.findById(medicineId)
-                .filter(m -> m.getUserId().equals(userId))
+                .filter(m -> m.getUserId().equals(userId) && m.getProfileId().equals(profileId))
                 .orElseThrow(() -> {
-                    log.warn("Medicine {} not found or does not belong to user {}", medicineId, userId);
-                    return new RuntimeException("Medicine not found or does not belong to user");
+                    log.warn("Medicine {} not found or does not belong to user {} or profile {}", medicineId, userId, profileId);
+                    return new RuntimeException("Medicine not found or does not belong to user or profile");
                 });
         
         // Soft delete by setting status to INACTIVE
@@ -194,17 +208,24 @@ public class MedicineServiceImpl implements MedicineService {
      * Take a dose of a medicine (decrement quantity by 1)
      * @param medicineId The ID of the medicine to take a dose from
      * @param userId The ID of the user taking the dose
+     * @param profileId The ID of the profile the medicine belongs to
      * @return Updated medicine response after taking the dose
      */
     @Override
-    public MedicineResponse takeDose(UUID medicineId, UUID userId) {
-        log.info("Taking dose from medicine {} for user {}", medicineId, userId);
+    public MedicineResponse takeDose(UUID medicineId, UUID userId, UUID profileId) {
+        log.info("Taking dose from medicine {} for user {} and profile {}", medicineId, userId, profileId);
+        
+        // Verify that the profile belongs to the user
+        if (!profileRepository.existsByUserIdAndId(userId, profileId)) {
+            log.warn("Profile {} does not exist or does not belong to user {}", profileId, userId);
+            throw new RuntimeException("Profile does not exist or does not belong to user");
+        }
         
         Medicine medicine = medicineRepository.findById(medicineId)
-                .filter(m -> m.getUserId().equals(userId) && m.getStatus() == Medicine.MedicineStatus.ACTIVE)
+                .filter(m -> m.getUserId().equals(userId) && m.getProfileId().equals(profileId) && m.getStatus() == Medicine.MedicineStatus.ACTIVE)
                 .orElseThrow(() -> {
-                    log.warn("Medicine {} not found or does not belong to user {}", medicineId, userId);
-                    return new RuntimeException("Medicine not found or does not belong to user");
+                    log.warn("Medicine {} not found or does not belong to user {} or profile {}", medicineId, userId, profileId);
+                    return new RuntimeException("Medicine not found or does not belong to user or profile");
                 });
         
         if (medicine.getQuantity() <= 0) {
