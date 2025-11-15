@@ -28,4 +28,21 @@ public interface ProfileRepository extends JpaRepository<Profile, UUID> {
      * @return true if profile exists for the user, false otherwise
      */
     boolean existsByUserIdAndId(UUID userId, UUID id);
+    
+    /**
+     * Check if a profile name already exists for a specific user
+     * @param userId The user ID to check
+     * @param name The profile name to check
+     * @return true if a profile with the name exists for the user, false otherwise
+     */
+    boolean existsByUserIdAndName(UUID userId, String name);
+    
+    /**
+     * Check if a profile name already exists for a specific user, excluding a specific profile ID
+     * @param userId The user ID to check
+     * @param name The profile name to check
+     * @param id The profile ID to exclude from the check
+     * @return true if a profile with the name exists for the user (excluding the specified ID), false otherwise
+     */
+    boolean existsByUserIdAndNameAndIdNot(UUID userId, String name, UUID id);
 }
