@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of MedicineService for medicine management operations
- * Handles CRUD operations for user medicines with profile-based organization and soft deletion
+ * Handles CRUD operations for user medicines with profile-based organization
  */
 @Service
 @RequiredArgsConstructor
@@ -177,14 +177,14 @@ public class MedicineServiceImpl implements MedicineService {
     }
     
     /**
-     * Soft delete a medicine by ID (set status to INACTIVE)
+     * Hard delete a medicine by ID
      * @param medicineId The ID of the medicine to delete
      * @param userId The ID of the user deleting the medicine
      * @param profileId The ID of the profile the medicine belongs to
      */
     @Override
     public void deleteMedicine(UUID medicineId, UUID userId, UUID profileId) {
-        log.info("Soft deleting medicine {} for user {} and profile {}", medicineId, userId, profileId);
+        log.info("Hard deleting medicine {} for user {} and profile {}", medicineId, userId, profileId);
         
         // Verify that the profile belongs to the user
         if (!profileRepository.existsByUserIdAndId(userId, profileId)) {
@@ -199,10 +199,9 @@ public class MedicineServiceImpl implements MedicineService {
                     return new RuntimeException("Medicine not found or does not belong to user or profile");
                 });
         
-        // Soft delete by setting status to INACTIVE
-        medicine.setStatus(Medicine.MedicineStatus.INACTIVE);
-        medicineRepository.save(medicine);
-        log.info("Medicine {} soft deleted successfully", medicineId);
+        // Hard delete the medicine
+        medicineRepository.delete(medicine);
+        log.info("Medicine {} hard deleted successfully", medicineId);
     }
     
     /**
