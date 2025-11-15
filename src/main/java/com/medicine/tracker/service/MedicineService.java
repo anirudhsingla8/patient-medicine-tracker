@@ -2,6 +2,7 @@ package com.medicine.tracker.service;
 
 import com.medicine.tracker.model.dto.request.MedicineRequest;
 import com.medicine.tracker.model.dto.response.MedicineResponse;
+import com.medicine.tracker.model.dto.response.MedicineWithProfileResponse;
 import com.medicine.tracker.model.entity.Medicine;
 
 import java.util.List;
@@ -79,4 +80,11 @@ public interface MedicineService {
      * @return true if medicine exists and belongs to user, false otherwise
      */
     boolean medicineExistsForUser(UUID medicineId, UUID userId);
+    
+    /**
+     * Get all medicines for a user with profile information
+     * @param userId The ID of the user to retrieve medicines for
+     * @return List of medicines with profile information
+     */
+    List<MedicineWithProfileResponse> getAllMedicinesWithProfileInfo(UUID userId);
 }
