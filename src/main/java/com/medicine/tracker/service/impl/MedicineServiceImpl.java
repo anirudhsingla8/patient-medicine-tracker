@@ -2,6 +2,7 @@ package com.medicine.tracker.service.impl;
 
 import com.medicine.tracker.model.dto.request.MedicineRequest;
 import com.medicine.tracker.model.dto.response.MedicineResponse;
+import com.medicine.tracker.model.dto.response.MedicineWithProfileResponse;
 import com.medicine.tracker.model.entity.Medicine;
 import com.medicine.tracker.model.entity.Profile;
 import com.medicine.tracker.repository.MedicineRepository;
@@ -278,5 +279,50 @@ public class MedicineServiceImpl implements MedicineService {
                 .createdAt(medicine.getCreatedAt())
                 .updatedAt(medicine.getUpdatedAt())
                 .build();
+    }
+    
+    /**
+     * Get all medicines for a user with profile information
+     * @param userId The ID of the user to retrieve medicines for
+     * @return List of medicines with profile information
+     */
+    @Override
+    public List<MedicineWithProfileResponse> getAllMedicinesWithProfileInfo(UUID userId) {
+        log.info("Retrieving all medicines with profile info for user {}", userId);
+        
+        List<Medicine> medicines = medicineRepository.findByUserIdAndStatus(
+                userId,
+                Medicine.MedicineStatus.ACTIVE
+        );
+        
+        List<MedicineWithProfileResponse> medicinesWithProfile = medicines.stream()
+                .map(medicine -> {
+                    // Get profile information for the medicine
+                    Profile profile = profileRepository.findById(medicine.getProfileId()).orElse(null);
+                    String profileName = profile != null ? profile.getName() : "Unknown Profile";
+                    
+                    return MedicineWithProfileResponse.builder()
+                            .id(medicine.getId())
+                            .userId(medicine.getUserId())
+                            .profileId(medicine.getProfileId())
+                            .profileName(profileName)
+                            .name(medicine.getName())
+                            .imageUrl(medicine.getImageUrl())
+                            .dosage(medicine.getDosage())
+                            .quantity(medicine.getQuantity())
+                            .expiryDate(medicine.getExpiryDate())
+                            .category(medicine.getCategory())
+                            .notes(medicine.getNotes())
+                            .composition(medicine.getComposition())
+                            .form(medicine.getForm())
+                            .status(medicine.getStatus())
+                            .createdAt(medicine.getCreatedAt())
+                            .updatedAt(medicine.getUpdatedAt())
+                            .build();
+                })
+                .collect(Collectors.toList());
+        
+        log.info("Retrieved {} medicines with profile info for user {}", medicinesWithProfile.size(), userId);
+        return medicinesWithProfile;
     }
 }

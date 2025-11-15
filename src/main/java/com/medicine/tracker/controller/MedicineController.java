@@ -2,6 +2,7 @@ package com.medicine.tracker.controller;
 
 import com.medicine.tracker.model.dto.request.MedicineRequest;
 import com.medicine.tracker.model.dto.response.MedicineResponse;
+import com.medicine.tracker.model.dto.response.MedicineWithProfileResponse;
 import com.medicine.tracker.service.MedicineService;
 import com.medicine.tracker.service.ImageUploadService;
 import jakarta.validation.Valid;
@@ -162,5 +163,20 @@ public class MedicineController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error uploading image: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Get all medicines for the authenticated user with profile information
+     * @return List of all medicines with profile information belonging to the user
+     */
+    @GetMapping("/medicines")
+    public ResponseEntity<List<MedicineWithProfileResponse>> getAllMedicinesWithProfileInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        com.medicine.tracker.model.entity.User user =
+            (com.medicine.tracker.model.entity.User) authentication.getPrincipal();
+        UUID userId = user.getId();
+        
+        List<MedicineWithProfileResponse> medicines = medicineService.getAllMedicinesWithProfileInfo(userId);
+        return ResponseEntity.ok(medicines);
     }
 }
