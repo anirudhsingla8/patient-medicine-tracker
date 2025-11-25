@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-dawn-sun-ado7dfxi-pooler.c-2.us-east-1.aws.neon.tech:5432/medicine_tracker
+      - SPRING_DATASOURCE_USERNAME=neondb_owner
+      - SPRING_DATASOURCE_PASSWORD=npg_XqdsaxYoRl47
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - DB_SSL_MODE=require
+    networks:
+      - medicine-tracker-network
+
+networks:
+  medicine-tracker-network:
+    driver: bridge
